@@ -1,0 +1,247 @@
+.effect1 .effect-obj1,
+.effect2 .effect-obj1{
+  top: 0%;
+  left: 0%;
+  right: 0%;
+  bottom: 0%;
+  position: absolute;
+  
+  transition: 0s .5s transform;
+}
+.effect1 .effect-obj1-1,
+.effect2 .effect-obj1-1{
+  border-radius: 50%;
+  top: 0%;
+  left: 0%;
+  right: 0%;
+  bottom: 0%;
+  position: absolute;
+  transition: .5s;
+}
+.effect1.on .effect-obj1,
+.effect2.on .effect-obj1{
+  transform: scale(0);
+}
+
+.effect1.on .effect-obj1-1,
+.effect2.on .effect-obj1-1{
+  opacity: 0;
+  transform: scale(2.5);
+}
+
+
+.effect3{
+  overflow: hidden;
+  perspective: 200px;
+}
+.effect3 .effect-obj1{
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  transform: rotateX(45deg);
+}
+.effect3 .effect-obj2{
+  position: absolute;
+  top: 0;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.effect3.on > *{
+  transform: translateY(-100%) rotateX(0);
+  transition: .5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  border: 1px solid transparent;
+}
+
+
+
+
+.effect4 .effect-obj1{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  box-sizing: border-box;
+  transform: scale(15);
+  transition: .5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.effect4.on > .effect-obj1{
+  transform: scale(1);
+}
+
+.effect5 .effect-obj1{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  box-sizing: border-box;
+}
+
+.effect5.on > .effect-obj1{
+  animation: effect5 .5s linear;
+}
+
+@keyframes effect5 {
+  0% {transform: translateY(-200%)}
+  80%{transform: translateY(0)}
+  95%{transform: scaleX(2)}
+  100%{transform: scaleX(1)}
+}
+
+.effect6 .effect-obj1{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  box-sizing: border-box;
+  transition: .5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  box-shadow: 0 0 5px #000;
+  background: #fff;
+}
+.effect6 .effect-obj3{
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  transform: scale(0);
+  transition: 0s .5s transform;
+}
+.effect6.on .effect-obj2{
+  transition: 0s .5s transform;
+  transform: scale(0);
+}
+.effect6.on .effect-obj3{
+  transform: scale(1);
+}
+.effect6.on .effect-obj1{
+  transform: translate(0)!important;
+  box-shadow: none;
+  background: 0;
+  opacity: 0;
+}
+
+
+.effect7{
+  border: 2px solid gold;
+  border-radius: 50%;
+  background: linear-gradient(45deg, navy, #000);
+  box-sizing: border-box;
+}
+
+.effect7 .tics{
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+}
+.effect7 .tics > div{
+  text-align: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  font-size: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: #fff;
+}
+
+.effect7 .tics > div:nth-child(1){transform: rotate(0);}
+.effect7 .tics > div:nth-child(2){transform: rotate(30deg);}
+.effect7 .tics > div:nth-child(3){transform: rotate(60deg);}
+.effect7 .tics > div:nth-child(4){transform: rotate(90deg);}
+.effect7 .tics > div:nth-child(5){transform: rotate(120deg);}
+.effect7 .tics > div:nth-child(6){transform: rotate(150deg);}
+.effect7 .tics > div:nth-child(7){transform: rotate(180deg);}
+.effect7 .tics > div:nth-child(8){transform: rotate(210deg);}
+.effect7 .tics > div:nth-child(9){transform: rotate(240deg);}
+.effect7 .tics > div:nth-child(10){transform: rotate(270deg);}
+.effect7 .tics > div:nth-child(11){transform: rotate(300deg);}
+.effect7 .tics > div:nth-child(12){transform: rotate(330deg);}
+
+.effect7 .hands{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.effect7 .hands > div{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: transform .5s;
+}
+.effect7 .hands > div:after{
+  content: '';
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 45%;
+}
+.effect7 .hands > .hand-m:after{
+  top: 10%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(transparent, #f00);
+}
+.effect7 .hands > .hand-h:after{
+  top: 20%;
+  width: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 5px #fff;
+  background: #fff;
+}
+
+/* .effect7:hover .digital-num{
+  opacity: 1;
+} */
+
+.effect7 .digital-num{
+  /* opacity: 0; */
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  display: flex;
+  align-items: end;
+  color: #000;
+  padding: 3px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+.effect7 .digital-num.left-side{
+  background: linear-gradient(to left, #fff, transparent);
+  justify-content: end;
+}
+.effect7 .digital-num.right-side{
+  background: linear-gradient(to right, #fff, transparent);
+  justify-content: start;
+}
+
+.bingo .effect7{
+  background: linear-gradient(45deg, #fff, turquoise);
+  justify-content: center;
+}
