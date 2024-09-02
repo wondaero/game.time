@@ -112,6 +112,8 @@ class TimesWar{
             }
             ${cn('player-interface')}.active{
                 box-shadow: 0 0 48px #fff;
+                background: linear-gradient(135deg, #fff 12px, transparent 0);
+                
             }
             ${cn('player-interface')} header{
                 display: flex;
@@ -400,9 +402,8 @@ class TimesWar{
                     t.effectTile(tile.dataset.tileIdx);
 
                     if(t.chkWinCase(+tile.dataset.tileIdx)){
+                        console.log(t.data.wonTiles);
                         t.data.wonTiles.forEach((tileIdx) => {
-                            console.log(t.ui.boardSection.querySelectorAll('[data-tile-idx="' + tileIdx + '"]'));
-                            console.log(t.ui.boardSection.querySelector('[data-tile-idx="' + tileIdx + '"]'));
                             t.ui.boardSection.querySelector('[data-tile-idx="' + tileIdx + '"]').classList.add('mark');
                         })
                     };
@@ -539,82 +540,163 @@ class TimesWar{
     }
 
     chkWinCase(tileIdx){
+        let rtnVal =false;
+
+        //가로세로
+        if(this.checkGS(tileIdx, 'g')) rtnVal = true;
+        if(this.checkGS(tileIdx, 's')) rtnVal = true;
+        if(this.checkX(tileIdx, '0130')) rtnVal = true;
+        if(this.checkX(tileIdx, '0430')) rtnVal = true;
+
+        return rtnVal;
+    }
+
+
+    /**
+     * 가로세로 체크 후 맞는 값이 있으면 return
+     * @param {number} tileIdx 마지막으로 클릭한 타일의 idx
+     * @param {string} type g: 가로, s: 세로
+     * @returns bool
+     */
+    checkGS(tileIdx, type = 'g'){
+
+        let rtnVal = false;
+
+        const d = idx => this.data.board[idx] === '' ? '' : +this.data.board[idx];
+
+        const roco = type  === 'g' ? parseInt(tileIdx / 5) : tileIdx % 5;   //row or col
+
+        const adjVal = (val) => type === 'g' ? val * 5 : val;
+
+        let intervalNull = false;
+
+        const tile0 = d(tileIdx);
+        let tile_2, tile_1, tile1, tile2;
+
+        if(1 < roco){
+            tile_2 = d(tileIdx - adjVal(2));
+            tile_1 = d(tileIdx - adjVal(1));
+
+            if(tile_2 !== '' && tile_1 !== ''){
+                if((tile_2 === tile_1 && tile_1 === tile0)
+                || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
+                || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
+                    this.data.wonTiles = [tileIdx - adjVal(2), tileIdx - adjVal(1), tileIdx];
+                    rtnVal = true;
+                }
+            }else{
+                if(tile_1 === '') intervalNull = true;
+            }
+        }
+
+        if(roco < 3){
+            tile1 = d(tileIdx + adjVal(1));
+            tile2 = d(tileIdx + adjVal(2));
+
+            if(tile1 !== '' && tile2 !== ''){
+                if((tile0 === tile1 && tile1 === tile2)
+                || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
+                || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
+                    this.data.wonTiles = [tileIdx, tileIdx + adjVal(1), tileIdx + adjVal(2)];
+                    rtnVal = true;
+                }
+            }else{
+                if(tile1 === '') intervalNull = true;
+            }
+        }
+
+        if(!intervalNull && tile_1 !== undefined && tile1 !== undefined){
+            if((tile_1 === tile0 && tile0 === tile1)
+            || (tile_1 - 1 === tile0 && tile0 === tile1 + 1)
+            || (tile_1 + 1 === tile0 && tile0 === tile1 - 1)){
+                this.data.wonTiles = [tileIdx - adjVal(1), tileIdx, tileIdx + adjVal(5)];
+                rtnVal = true;
+            }
+        }
+
+        return rtnVal;
+    }
+
+    /**
+     * 
+     * @param {number} tileIdx 마지막으로 클릭한 타일의 idx
+     * @param {string} dir 0130: 1시30분방향(시침), 0430: 4시30분방향(시침)
+     * @returns 
+     */
+    checkX(tileIdx, dir = '0130'){
         // 00 01 02 03 04
         // 05 06 07 08 09
         // 10 11 12 13 14
         // 15 16 17 18 19
         // 20 21 22 23 24
 
+        let rtnVal = false;
 
         const d = idx => this.data.board[idx] === '' ? '' : +this.data.board[idx];
 
         const row = parseInt(tileIdx / 5);
         const col = tileIdx % 5;
 
+        const adjVal = (val) => {
+            const adjRow = row + val;
+            const adjCol = col + (val * (dir === '0130' ? -1 : 1));
+
+            if(4 < adjRow || adjRow < 0) return;
+            if(4 < adjCol || adjCol < 0) return;
+
+            return (adjRow * 5) + adjCol;
+        }
+
+        let intervalNull = false;
+
+        const tile_2 = d(adjVal(-2));
+        const tile_1 = d(adjVal(-1));
+        const tile0 = d(adjVal(0));
+        const tile1 = d(adjVal(1));
+        const tile2 = d(adjVal(2));
+
+        console.log(dir, tile_2, tile_1, tile0, tile1, tile2);
+
+        if(1 < row && (dir === '0130' ? col < 3 : 1 < col)){ //좌상, 우상
+            if(tile_2 !== '' && tile_1 !== ''){
+                if((tile_2 === tile_1 && tile_1 === tile0)
+                || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
+                || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
+                    this.data.wonTiles = [tileIdx - adjVal(2), tileIdx - adjVal(1), tileIdx];
+                    console.log('좌상, 우상')
+                    rtnVal = true;
+                }
+            }else{
+                if(tile_1 === '') intervalNull = true;
+            }
+        }
         
-        if(row < 3){    //아래만
-            if(
-                (d(tileIdx + 5) === d(tileIdx) && d(tileIdx) === d(tileIdx + 10)) ||
-                ((d(tileIdx + 5) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 10) - 2)) ||
-                ((d(tileIdx + 5) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 10) + 2))
-            ){
-                this.data.wonTiles = [tileIdx, tileIdx + 5, tileIdx + 10];
-                return true;
-            }
-        }
-        if(1 < row){    //위에만
-            if(
-                (d(tileIdx - 5) === d(tileIdx) && d(tileIdx) === d(tileIdx - 10)) ||
-                ((d(tileIdx - 5) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx - 10) - 2)) ||
-                ((d(tileIdx - 5) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx - 10) + 2))
-            ){
-                this.data.wonTiles = [tileIdx - 10, tileIdx - 5, tileIdx];
-                return true;
-            }
-        }
-        if(0 < row && row < 4){ //상하 가운데
-            if(
-                (d(tileIdx - 5) === d(tileIdx) && d(tileIdx) === d(tileIdx + 5)) ||
-                ((d(tileIdx - 5) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 5) + 1)) ||
-                ((d(tileIdx - 5) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 5) - 1))
-            ){
-                this.data.wonTiles = [tileIdx - 5, tileIdx, tileIdx + 5];
-                return true;
+        if(row < 3 && (dir === '0130' ? 1 < col : col < 3)){ //좌하, 우하
+            if(tile1 !== '' && tile2 !== ''){
+                if((tile0 === tile1 && tile1 === tile2)
+                || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
+                || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
+                    this.data.wonTiles = [tileIdx, tileIdx + adjVal(1), tileIdx + adjVal(2)];
+                    console.log('좌하, 우하')
+                    rtnVal = true;
+                }
+            }else{
+                if(tile1 === '') intervalNull = true;
             }
         }
 
-        if(col < 3){    //오른쪽
-            if(
-                (d(tileIdx + 1) === d(tileIdx) && d(tileIdx) === d(tileIdx + 2)) ||
-                ((d(tileIdx + 1) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 2) - 2)) ||
-                ((d(tileIdx + 1) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 2) + 2))
-            ){
-                this.data.wonTiles = [tileIdx, tileIdx + 1, tileIdx + 2];
-                return true;
-            }
-        }
-        if(1 < col){    //왼쪽
-            if(
-                (d(tileIdx - 1) === d(tileIdx) && d(tileIdx) === d(tileIdx - 2)) ||
-                ((d(tileIdx - 1) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx - 2) - 2)) ||
-                ((d(tileIdx - 1) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx - 2) + 2))
-            ){
-                this.data.wonTiles = [tileIdx - 2, tileIdx - 1, tileIdx];
-                return true;
-            }
-        }
-        if(0 < col && col < 4){ //좌우 가운데
-            if(
-                (d(tileIdx - 1) === d(tileIdx) && d(tileIdx) === d(tileIdx + 1)) ||
-                ((d(tileIdx - 1) - 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 1) + 1)) ||
-                ((d(tileIdx - 1) + 1) === d(tileIdx) && d(tileIdx) === (d(tileIdx + 1) - 1))
-            ){
-                this.data.wonTiles = [tileIdx - 1, tileIdx, tileIdx + 1];
-                return true;
+        
+
+        if(!intervalNull && tile_1 !== undefined && tile1 !== undefined){
+            if((tile_1 === tile0 && tile0 === tile1)
+            || (tile_1 - 1 === tile0 && tile0 === tile1 + 1)
+            || (tile_1 + 1 === tile0 && tile0 === tile1 - 1)){
+                console.log('xxxx')
+                this.data.wonTiles = [tileIdx - adjVal(1), tileIdx, tileIdx + adjVal(1)];
+                rtnVal = true;
             }
         }
 
-
-        return false;
+        return rtnVal;
     }
 }
