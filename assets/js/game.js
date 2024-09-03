@@ -402,18 +402,17 @@ class TimesWar{
                     t.effectTile(tile.dataset.tileIdx);
 
                     if(t.chkWinCase(+tile.dataset.tileIdx)){
-                        console.log(t.data.wonTiles);
                         t.data.wonTiles.forEach((tileIdx) => {
                             t.ui.boardSection.querySelector('[data-tile-idx="' + tileIdx + '"]').classList.add('mark');
                         })
-                    };
 
-                    //계산 로직 구현해야함
+                        this.ui.wrapper.classList.add('freeze');
+
+                        return;
+                    };
 
 
                     t.switchTurn();
-
-                    
 
                 })
             }
@@ -487,7 +486,7 @@ class TimesWar{
             `;
 
             setTimeout(() => {
-                effect.style.transform = 'scale(1)'
+                effect.style.transform = 'scale(1)';
                 effect.style.opacity = 0;
             })
             
@@ -559,7 +558,6 @@ class TimesWar{
      * @returns bool
      */
     checkGS(tileIdx, type = 'g'){
-
         let rtnVal = false;
 
         const d = idx => this.data.board[idx] === '' ? '' : +this.data.board[idx];
@@ -624,15 +622,9 @@ class TimesWar{
      * @returns 
      */
     checkX(tileIdx, dir = '0130'){
-        // 00 01 02 03 04
-        // 05 06 07 08 09
-        // 10 11 12 13 14
-        // 15 16 17 18 19
-        // 20 21 22 23 24
-
         let rtnVal = false;
 
-        const d = idx => this.data.board[idx] === '' ? '' : +this.data.board[idx];
+        const d = idx => !this.data.board[idx] ? '' : +this.data.board[idx];
 
         const row = parseInt(tileIdx / 5);
         const col = tileIdx % 5;
@@ -655,44 +647,35 @@ class TimesWar{
         const tile1 = d(adjVal(1));
         const tile2 = d(adjVal(2));
 
-        console.log(dir, tile_2, tile_1, tile0, tile1, tile2);
+        // console.log(dir, tile_2, tile_1, tile0, tile1, tile2);
 
-        if(1 < row && (dir === '0130' ? col < 3 : 1 < col)){ //좌상, 우상
-            if(tile_2 !== '' && tile_1 !== ''){
-                if((tile_2 === tile_1 && tile_1 === tile0)
-                || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
-                || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
-                    this.data.wonTiles = [tileIdx - adjVal(2), tileIdx - adjVal(1), tileIdx];
-                    console.log('좌상, 우상')
-                    rtnVal = true;
-                }
-            }else{
-                if(tile_1 === '') intervalNull = true;
+        if(tile_2 && tile_1){ //좌상, 우상
+            if((tile_2 === tile_1 && tile_1 === tile0)
+            || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
+            || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
+                this.data.wonTiles = [adjVal(-2), adjVal(-1), adjVal(0)];
+                rtnVal = true;
             }
+        }else{
+            if(tile_1 === '') intervalNull = true;
         }
         
-        if(row < 3 && (dir === '0130' ? 1 < col : col < 3)){ //좌하, 우하
-            if(tile1 !== '' && tile2 !== ''){
-                if((tile0 === tile1 && tile1 === tile2)
-                || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
-                || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
-                    this.data.wonTiles = [tileIdx, tileIdx + adjVal(1), tileIdx + adjVal(2)];
-                    console.log('좌하, 우하')
-                    rtnVal = true;
-                }
-            }else{
-                if(tile1 === '') intervalNull = true;
+        if(tile1 && tile2){ //좌하, 우하
+            if((tile0 === tile1 && tile1 === tile2)
+            || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
+            || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
+                this.data.wonTiles = [adjVal(0), adjVal(1), adjVal(2)];
+                rtnVal = true;
             }
+        }else{
+            if(tile1 === '') intervalNull = true;
         }
 
-        
-
-        if(!intervalNull && tile_1 !== undefined && tile1 !== undefined){
+        if(!intervalNull && tile_1  && tile1){
             if((tile_1 === tile0 && tile0 === tile1)
             || (tile_1 - 1 === tile0 && tile0 === tile1 + 1)
             || (tile_1 + 1 === tile0 && tile0 === tile1 - 1)){
-                console.log('xxxx')
-                this.data.wonTiles = [tileIdx - adjVal(1), tileIdx, tileIdx + adjVal(1)];
+                this.data.wonTiles = [adjVal(-1), adjVal(0), adjVal(1)];
                 rtnVal = true;
             }
         }
