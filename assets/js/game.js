@@ -19,9 +19,15 @@ class TimesWar{
                 '', '', '', '', '',
                 '', '', '', '', '',
             ],
-            thisTurn: 1,
+            thisTurn: this.getRandomNum(1, 2),
             pickedIdx: undefined,
-            wonTiles: []
+            wonTiles: [],
+            timer: {
+                raf: undefined,
+                duration: 60 * 1000,
+                startTime: undefined
+            }
+
         }
 
         this.ui = {}
@@ -34,6 +40,8 @@ class TimesWar{
         this.initCardsNum();
         this.updatePlayerCardUI('setting');
         this.setPlayerActive();
+
+        this.timerStart();
 
     }
 
@@ -111,7 +119,7 @@ class TimesWar{
                 box-sizing: border-box;
             }
             ${cn('player-interface')}.active{
-                box-shadow: 0 0 48px #fff;
+                box-shadow: 0 0 100px #fff;
                 background: linear-gradient(135deg, #fff 12px, transparent 0);
                 
             }
@@ -129,9 +137,10 @@ class TimesWar{
                 box-sizing: border-box;
             }
             ${cn('player-interface')} header .timer{
-                width: 30px;
-                height: 20px;
-                background: #fff;
+                width: 50px;
+                height: 12px;
+                background: #888;
+                transition: background .1s;
             }
             ${cn('player-interface')} ul{
                 display: flex;
@@ -306,7 +315,8 @@ class TimesWar{
         const cardsList = document.createElement('ul');
 
         idTag.textContent = playerId;
-        timer.classList.add("timer");
+        timer.classList.add('timer');
+        timer.dataset.id = 'timer';
 
         for(let i = 0; i < 3; i++){
             const card = document.createElement('li');
@@ -407,12 +417,14 @@ class TimesWar{
                         })
 
                         this.ui.wrapper.classList.add('freeze');
+                        window.cancelAnimationFrame(this.data.timer.raf);
 
                         return;
                     };
 
 
                     t.switchTurn();
+                    t.timerStart();
 
                 })
             }
@@ -550,7 +562,6 @@ class TimesWar{
         return rtnVal;
     }
 
-
     /**
      * 가로세로 체크 후 맞는 값이 있으면 return
      * @param {number} tileIdx 마지막으로 클릭한 타일의 idx
@@ -559,59 +570,61 @@ class TimesWar{
      */
     checkGS(tileIdx, type = 'g'){
         let rtnVal = false;
+    
+        const d = idx => !this.data.board[idx] ? '' : +this.data.board[idx];
 
-        const d = idx => this.data.board[idx] === '' ? '' : +this.data.board[idx];
+        const row = parseInt(tileIdx / 5);
+        const col = tileIdx % 5;
+    
+        const adjVal = (val) => {
+            const adjRow = row + (type === 'g' ? 0 : val);
+            const adjCol = col + (type === 'g' ? val : 0);
 
-        const roco = type  === 'g' ? parseInt(tileIdx / 5) : tileIdx % 5;   //row or col
+            if(4 < adjRow || adjRow < 0) return;
+            if(4 < adjCol || adjCol < 0) return;
 
-        const adjVal = (val) => type === 'g' ? val * 5 : val;
-
+            return (adjRow * 5) + adjCol;
+        }
+    
         let intervalNull = false;
+    
+        const tile_2 = d(adjVal(-2));
+        const tile_1 = d(adjVal(-1));
+        const tile0 = d(adjVal(0));
+        const tile1 = d(adjVal(1));
+        const tile2 = d(adjVal(2));
 
-        const tile0 = d(tileIdx);
-        let tile_2, tile_1, tile1, tile2;
-
-        if(1 < roco){
-            tile_2 = d(tileIdx - adjVal(2));
-            tile_1 = d(tileIdx - adjVal(1));
-
-            if(tile_2 !== '' && tile_1 !== ''){
-                if((tile_2 === tile_1 && tile_1 === tile0)
-                || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
-                || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
-                    this.data.wonTiles = [tileIdx - adjVal(2), tileIdx - adjVal(1), tileIdx];
-                    rtnVal = true;
-                }
-            }else{
-                if(tile_1 === '') intervalNull = true;
+        if(tile_2 && tile_1){
+            if((tile_2 === tile_1 && tile_1 === tile0)
+            || (tile_2 - 1 === tile_1 && tile_1 === tile0 + 1)
+            || (tile_2 + 1 === tile_1 && tile_1 === tile0 - 1)){
+                this.data.wonTiles = [adjVal(-2), adjVal(-1), adjVal(0)];
+                rtnVal = true;
             }
+        }else{
+            if(tile_1 === '') intervalNull = true;
         }
-
-        if(roco < 3){
-            tile1 = d(tileIdx + adjVal(1));
-            tile2 = d(tileIdx + adjVal(2));
-
-            if(tile1 !== '' && tile2 !== ''){
-                if((tile0 === tile1 && tile1 === tile2)
-                || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
-                || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
-                    this.data.wonTiles = [tileIdx, tileIdx + adjVal(1), tileIdx + adjVal(2)];
-                    rtnVal = true;
-                }
-            }else{
-                if(tile1 === '') intervalNull = true;
+    
+        if(tile1 && tile2){
+            if((tile0 === tile1 && tile1 === tile2)
+            || (tile0 - 1 === tile1 && tile1 === tile2 + 1)
+            || (tile0 + 1 === tile1 && tile1 === tile2 - 1)){
+                this.data.wonTiles = [adjVal(0), adjVal(1), adjVal(2)];
+                rtnVal = true;
             }
+        }else{
+            if(tile1 === '') intervalNull = true;
         }
-
-        if(!intervalNull && tile_1 !== undefined && tile1 !== undefined){
+    
+        if(!intervalNull && tile_1 && tile1){
             if((tile_1 === tile0 && tile0 === tile1)
             || (tile_1 - 1 === tile0 && tile0 === tile1 + 1)
             || (tile_1 + 1 === tile0 && tile0 === tile1 - 1)){
-                this.data.wonTiles = [tileIdx - adjVal(1), tileIdx, tileIdx + adjVal(5)];
+                this.data.wonTiles = [adjVal(-1), adjVal(0), adjVal(1)];
                 rtnVal = true;
             }
         }
-
+    
         return rtnVal;
     }
 
@@ -681,5 +694,39 @@ class TimesWar{
         }
 
         return rtnVal;
+    }
+
+    timerStart(){
+        this.data.timer.startTime = performance.now();
+        console.log(this.data.timer.startTime);
+        console.log(this.data.timer.duration)
+        this.timer();
+    }
+    
+    timer = (currTime) => {
+        const {duration, startTime} = this.data.timer;
+        const target = this.ui['player' + this.data.thisTurn].querySelector('[data-id="timer"]');
+        const otherTarget = this.ui['player' + (this.data.thisTurn === 1 ? 2 : 1)].querySelector('[data-id="timer"]');
+        
+        if(!currTime || currTime - startTime < duration){
+            
+            otherTarget.style.background = '#888';
+            otherTarget.style.boxShadow = 'none';
+
+            const backgroundStyle = `linear-gradient(to right, #fff ${(1 - ((currTime - startTime) / duration)) * 100}%, #888 0)`;
+            target.style.background = backgroundStyle;
+            target.style.boxShadow = 'inset 0 0 8px #fff';
+
+            this.data.timer.raf = window.requestAnimationFrame(this.timer);
+        }else{
+            window.cancelAnimationFrame(this.data.timer.raf);
+            this.autoAction();
+        }
+    }
+
+    autoAction(){
+        if(!this.data.pickedIdx) this.data.pickedIdx = this.getRandomNum(0, 2);
+        this.updatePlayerCardUI();
+        this.ui.boardSection.querySelectorAll('[data-tile-idx]')[this.getRandomNum(0, 24)].click();
     }
 }
