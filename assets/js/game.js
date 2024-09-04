@@ -711,11 +711,10 @@ class TimesWar{
         if(!currTime || currTime - startTime < duration){
             
             otherTarget.style.background = '#888';
-            otherTarget.style.boxShadow = 'none';
+            const color = duration - (currTime - startTime) <= 10 * 1000 ? '#f00' : '#fff';
 
-            const backgroundStyle = `linear-gradient(to right, #fff ${(1 - ((currTime - startTime) / duration)) * 100}%, #888 0)`;
+            const backgroundStyle = `linear-gradient(to right, ${color} ${(1 - ((currTime - startTime) / duration)) * 100}%, #888 0)`;
             target.style.background = backgroundStyle;
-            target.style.boxShadow = 'inset 0 0 8px #fff';
 
             this.data.timer.raf = window.requestAnimationFrame(this.timer);
         }else{
